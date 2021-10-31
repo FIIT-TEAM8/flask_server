@@ -7,6 +7,7 @@ on:
 
 jobs:
   build:
+    name: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -27,6 +28,7 @@ jobs:
 
   deploy:
     name: deploy
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -39,4 +41,4 @@ jobs:
         password: ${{ secrets.DEPLOY_PASSWORD }}
         script: |
           cd /home/fiitkar/docker-folder/
-          docker-compose pull && docker-compose up && docker system prune -f
+          docker-compose pull && docker-compose up --detach && docker system prune -f
