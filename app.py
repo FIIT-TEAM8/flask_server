@@ -1,5 +1,6 @@
 from flask import Flask
-from api.v1.search_routes import search_api
+# from api.v1.search_routes import search_api
+from api.v2.search_routes import search_api
 
 app = Flask(__name__)
 
