@@ -4,8 +4,8 @@ from api.v2.search_routes import search_api as search_api_v2
 
 app = Flask(__name__)
 
-# app.register_blueprint(search_api_v1)
-app.register_blueprint(search_api_v2)
+app.register_blueprint(search_api_v1, name="search_api_v1")
+app.register_blueprint(search_api_v2, name="search_api_v2")
 
 
 @app.route("/")
