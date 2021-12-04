@@ -46,7 +46,7 @@ def search():
 
     resp = es.search(index="articles_index", doc_type="_doc", body=body, size=10)
 
-    articles_ids = get_ids(resp)
+    article_ids = get_ids(resp)
 
     Database.initialize()
 
@@ -63,7 +63,7 @@ def search():
 
     response = {
         "query": query,
-        "articles_ids": articles_ids,
+        "articles_ids": article_ids,
         "search_from": search_from,
         "search_to": search_to,
         "locale": locale,
