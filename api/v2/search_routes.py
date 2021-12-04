@@ -10,8 +10,6 @@ from .db_connector import Database
 # /v2/search/
 search_api = Blueprint("search_routes", __name__, url_prefix="/" + api_settings.API_VERSION + "/search")
 
-# es = Elasticsearch('https://team08-21.studenti.fiit.stuba.sk/es01/')
-
 es = Elasticsearch(hosts=[
     {"host":'es01'}
 ])
@@ -47,7 +45,6 @@ def search():
     resp = es.search(index="articles_index", doc_type="_doc", body=body, size=10)
 
     article_ids = get_ids(resp)
-
     Database.initialize()
 
     articles = []
@@ -55,7 +52,8 @@ def search():
     for id in article_ids:
         # finds article document in articles collection by id
         article = Database.find_one('articles', {'_id': ObjectId(id)})
-        
+        article['body'] = article.pop('html')
+
         # finds crime keywords in crimemaps collection by article's link
         crime_keywords = Database.find_one('crimemaps', {'link': article['link']}, {'keywords': 1, '_id': 0})
         article.update(crime_keywords)
@@ -63,7 +61,6 @@ def search():
 
     response = {
         "query": query,
-        "articles_ids": article_ids,
         "search_from": search_from,
         "search_to": search_to,
         "locale": locale,
