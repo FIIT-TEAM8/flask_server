@@ -7,6 +7,7 @@ app = Flask(__name__)
 
 app.register_blueprint(search_api_v1, name="search_api_v1")
 app.register_blueprint(search_api_v2, name="search_api_v2")
+
 app.json_encoder = MyEncoder
 
 

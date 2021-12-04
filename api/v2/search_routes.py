@@ -6,6 +6,7 @@ from elasticsearch import Elasticsearch
 from bson.objectid import ObjectId
 from .db_connector import Database
 
+
 # /v2/search/
 search_api = Blueprint("search_routes", __name__, url_prefix="/" + api_settings.API_VERSION + "/search")
 
@@ -71,4 +72,3 @@ def search():
     }
 
     return jsonify(response)
-
