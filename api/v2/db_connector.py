@@ -1,7 +1,7 @@
 import os
 from bson.json_util import loads, dumps
 from pymongo import MongoClient
-
+import api.v2.api_settings as api_settings
 
 class Database(object):
     DATABASE = None
@@ -15,8 +15,8 @@ class Database(object):
         connection = MongoClient(
             host='mongo_db:27017',
             serverSelectionTimeoutMS = 3000,
-            username=os.environ['MONGO_INITDB_ROOT_USERNAME'] or 'root',
-            password=os.environ['MONGO_INITDB_ROOT_PASSWORD'] or 'password'
+            username=api_settings.MONGO_INITDB_ROOT_USERNAME,
+            password=api_settings.MONGO_INITDB_ROOT_PASSWORD
         )
 
         # connect to admin DB in Mongo
