@@ -13,14 +13,14 @@ class Database(object):
         # connection = MongoClient('localhost', 27017)
         
         connection = MongoClient(
-            host='mongo_db:27017',
+            host=api_settings.MONGO_SERVER_URL + ":" + str(api_settings.MONGO_SERVER_PORT),
             serverSelectionTimeoutMS = 3000,
-            username=api_settings.MONGO_INITDB_ROOT_USERNAME,
-            password=api_settings.MONGO_INITDB_ROOT_PASSWORD
+            username=api_settings.MONGO_USER,
+            password=api_settings.MONGO_PASSWORD
         )
 
         # connect to admin DB in Mongo
-        Database.DATABASE = connection['admin']
+        Database.DATABASE = connection[api_settings.MONGO_DB]
         # Database.DATABASE = connection['amsdb']
 
         # connect to 'articles' collection
