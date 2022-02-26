@@ -16,3 +16,5 @@ MONGO_SERVER_PORT = str(os.environ['MONGO_SERVER_PORT'] or 27017)
 MONGO_USER = str(os.environ['MONGO_USER'] or 'root')
 MONGO_PASSWORD = str(os.environ['MONGO_PASSWORD'] or 'password')
 MONGO_DB = str(os.environ['MONGO_DB'] or 'admin')
+
+ELASTIC_SERVER_URL = str(os.environ['ELASTIC_SERVER_URL'] or 'localhost')
