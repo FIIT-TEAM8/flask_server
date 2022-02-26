@@ -1,6 +1,6 @@
 import os
 
-API_VERSION = "v2"
+API_VERSION = "v3"
 
 # API parameters
 # /search endpoint
@@ -8,7 +8,7 @@ API_SEARCH_QUERY = "q"
 API_SEARCH_FROM = "from"
 API_SEARCH_TO = "to"
 API_SEARCH_LOCALE = "locale"
-
+API_PAGE_NUM = "page"
 
 # environmental variables
 MONGO_SERVER_URL = str(os.environ['MONGO_SERVER_URL'] or 'localhost')
