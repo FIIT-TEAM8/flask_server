@@ -8,8 +8,9 @@ from bson.objectid import ObjectId
 from .db_connector import Database
 
 
-# number of articles returned by elasticsearch
-SIZE = 20
+# max and deafult numbers of articles returned by elasticsearch
+MAX_SIZE = 20
+DEFAULT_SIZE = 10
 
 # /v3/search/
 search_api = Blueprint("search_routes", __name__, url_prefix="/" + api_settings.API_VERSION + "/search")
@@ -28,6 +29,18 @@ def get_ids(result):
     return ids
 
 
+# check if number of articles to be returned is valid 
+def check_size_validity(size):
+    
+    if size >= MAX_SIZE:
+        size = MAX_SIZE
+
+    elif size <= 0:
+        size = DEFAULT_SIZE
+    
+    return size
+
+
 @search_api.route("/", methods=['GET'])
 def search():
     query = request.args.get(api_settings.API_SEARCH_QUERY, default=None, type=str)
@@ -35,6 +48,7 @@ def search():
     search_to = request.args.get(api_settings.API_SEARCH_TO, default="", type=str)
     locale = request.args.get(api_settings.API_SEARCH_LOCALE, default="", type=str)
     page_num = request.args.get(api_settings.API_PAGE_NUM, default=1, type=int)
+    size = request.args.get(api_settings.API_PAGE_SIZE, default=DEFAULT_SIZE, type=int)
 
     if query is None:
         return "Invalid input, please provide 'q' parameter", 400
@@ -42,9 +56,11 @@ def search():
     if page_num <= 0:
         page_num = 1
 
+    size = check_size_validity(size)
+
     body = {
-        "from": page_num * SIZE - SIZE,
-        "size": SIZE,
+        "from": page_num * size - size,
+        "size": size,
         "query": {
             "multi_match": {
                 "query": query,
@@ -55,7 +71,7 @@ def search():
 
     resp = es.search(index="articles_index", doc_type="_doc", body=body)
     total_results = resp['hits']['total']['value']
-    total_pages = int(ceil(total_results/SIZE))
+    total_pages = int(ceil(total_results/size))
 
     article_ids = get_ids(resp)
     per_page = len(article_ids)

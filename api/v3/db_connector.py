@@ -1,7 +1,7 @@
 import os
 from bson.json_util import loads, dumps
 from pymongo import MongoClient
-import api.v2.api_settings as api_settings
+import api.v3.api_settings as api_settings
 
 class Database(object):
     DATABASE = None
