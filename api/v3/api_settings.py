@@ -9,6 +9,7 @@ API_SEARCH_FROM = "from"
 API_SEARCH_TO = "to"
 API_SEARCH_LOCALE = "locale"
 API_PAGE_NUM = "page"
+API_PAGE_SIZE = "size"
 
 # environmental variables
 MONGO_SERVER_URL = str(os.environ['MONGO_SERVER_URL'] or 'localhost')
