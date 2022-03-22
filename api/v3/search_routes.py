@@ -1,3 +1,5 @@
+from ast import keyword
+from email.policy import default
 from flask import Blueprint
 from flask.json import jsonify
 from math import ceil
@@ -37,8 +39,43 @@ def check_size_validity(size):
 
     elif size <= 0:
         size = DEFAULT_SIZE
-    
+
     return size
+
+
+# transforms keywords string to list
+def keywords_to_list(keywords):
+
+    # check if keywords are used
+    if not keywords:
+        return None
+    # transform keywords string into list
+    elif keywords[0] == '[' and keywords[len(keywords) - 1] == ']':
+        keywords = keywords[1:-1]
+        wordlist = keywords.split(',')
+        wordlist = [item.lstrip() for item in wordlist]
+        return wordlist
+    else:
+        return None
+
+
+# builds elasticsearch query with or without filters
+def build_query(query, keywords, page_num, size):
+    body = {
+        # pagination
+        "from": page_num * size - size,
+        "size": size,
+        # match query in article text
+        "query": {
+            "match": {
+                "text": {
+                    "query": query,
+                    "operator": "and"
+                }
+            }
+        }
+    }
+    return body
 
 
 @search_api.route("/", methods=['GET'])
@@ -49,6 +86,7 @@ def search():
     locale = request.args.get(api_settings.API_SEARCH_LOCALE, default="", type=str)
     page_num = request.args.get(api_settings.API_PAGE_NUM, default=1, type=int)
     size = request.args.get(api_settings.API_PAGE_SIZE, default=DEFAULT_SIZE, type=int)
+    keywords = request.args.get(api_settings.API_KEYWORDS, default="", type=str)
 
     if query is None:
         return "Invalid input, please provide 'q' parameter", 400
@@ -57,22 +95,32 @@ def search():
         page_num = 1
 
     size = check_size_validity(size)
+    keywords_list = keywords_to_list(keywords)
 
-    body = {
-        "from": page_num * size - size,
-        "size": size,
-        "query": {
-            "multi_match": {
-                "query": query,
-                "fields": ["text"]
-            }
-        }
-    }
+    body = build_query(query, keywords_list, page_num, size)
+
+    # body = {
+    #     # pagination
+    #     "from": page_num * size - size,
+    #     "size": size,
+    #     # match query in article text
+    #     "filtered": {
+    #         "query": {
+    #             "match": { "html": query },
+    #             "operator": "and"
+    #             },
+    #         # match results with at least one keyword from the list
+    #         "filter": {
+    #             "terms": {
+    #                 "keywords": keywords_list
+    #             }
+    #         }
+    #     }
+    # }
 
     resp = es.search(index="articles_index", doc_type="_doc", body=body)
     total_results = resp['hits']['total']['value']
     total_pages = int(ceil(total_results/size))
-
     article_ids = get_ids(resp)
     per_page = len(article_ids)
 
@@ -83,19 +131,20 @@ def search():
     for id in article_ids:
         # finds article document in articles collection by id
         article = Database.find_one('articles', {'_id': ObjectId(id)})
+        #article = Database.find_one('articles', {'_id': id})
         article['body'] = article.pop('html')
 
         # finds crime keywords in crimemaps collection by article's link
         crime_keywords = Database.find_one('crimemaps', {'link': article['link']}, {'keywords': 1, '_id': 0})
         article.update(crime_keywords)
         articles.append(article)
-
+        
+        
     response = {
         "query": query,
         "search_from": search_from,
         "search_to": search_to,
         "locale": locale,
-        #"result_count": len(article_ids),
         "page_num": page_num,
         "per_page": per_page,
         "total_pages": total_pages,
