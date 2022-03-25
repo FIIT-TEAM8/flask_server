@@ -17,9 +17,7 @@ DEFAULT_SIZE = 10
 # /v3/search/
 search_api = Blueprint("search_routes", __name__, url_prefix="/" + api_settings.API_VERSION + "/search")
 
-es = Elasticsearch(hosts=[
-    {"host": api_settings.ELASTIC_SERVER_URL}
-])
+es = Elasticsearch(host=api_settings.ES_CONNECTION_STRING, verify_certs=False)
 
 # get ids from elasticsearch results
 def get_ids(result):
