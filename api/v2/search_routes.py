@@ -10,9 +10,8 @@ from .db_connector import Database
 # /v2/search/
 search_api = Blueprint("search_routes", __name__, url_prefix="/" + api_settings.API_VERSION + "/search")
 
-es = Elasticsearch(hosts=[
-    {"host": api_settings.ELASTIC_SERVER_URL}
-])
+es = Elasticsearch(host=api_settings.ES_CONNECTION_STRING, verify_certs=False)
+
 
 def get_ids(result):
     ids = []
