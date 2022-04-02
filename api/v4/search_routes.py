@@ -3,31 +3,21 @@ from email.policy import default
 from flask import Blueprint
 from flask.json import jsonify
 from math import ceil
-import api.v3.api_settings as api_settings
+import api.v4.api_settings as api_settings
 from flask import request
-from elasticsearch import Elasticsearch
 from bson.objectid import ObjectId
 from .db_connector import Database
+from .elastic import Elastic
 
 
 # max and deafult numbers of articles returned by elasticsearch
 MAX_SIZE = 20
 DEFAULT_SIZE = 10
 
-# /v3/search/
+# /v4/search/
 search_api = Blueprint("search_routes", __name__, url_prefix="/" + api_settings.API_VERSION + "/search")
 
-es = Elasticsearch(hosts=api_settings.ES_CONNECTION_STRING, verify_certs=False)
-
-# get ids from elasticsearch results
-def get_ids(result):
-    ids = []
-
-    for res in result["hits"]["hits"]:
-        ids.append(res["_id"])
-
-    return ids
-
+elastic = Elastic()
 
 # check if number of articles to be returned is valid 
 def check_size_validity(size):
@@ -41,41 +31,23 @@ def check_size_validity(size):
     return size
 
 
-# transforms keywords string to list
-def keywords_to_list(keywords):
+# transforms string of filter parametes from request to list
+def string_to_list(params_str):
 
-    # check if keywords are used
-    if not keywords:
+    # check if filter is used
+    if not params_str:
         return None
     # transform keywords string into list
-    elif keywords[0] == '[' and keywords[len(keywords) - 1] == ']':
-        keywords = keywords[1:-1]
-        wordlist = keywords.split(',')
-        wordlist = [item.lstrip() for item in wordlist]
-        return wordlist
+    elif params_str[0] == '[' and params_str[len(params_str) - 1] == ']':
+        params_str = params_str[1:-1]
+        params_list = params_str.split(',')
+        params_list = [item.lstrip() for item in params_list]
+        return params_list
     else:
         return None
 
 
-# builds elasticsearch query with or without filters
-def build_query(query, keywords, page_num, size):
-    body = {
-        # pagination
-        "from": page_num * size - size,
-        "size": size,
-        # match query in article text
-        "query": {
-            "match": {
-                "text": {
-                    "query": query,
-                    "operator": "and"
-                }
-            }
-        }
-    }
-    return body
-
-
+# main function for searching
 @search_api.route("/", methods=['GET'])
 def search():
     query = request.args.get(api_settings.API_SEARCH_QUERY, default=None, type=str)
@@ -85,22 +57,25 @@ def search():
     page_num = request.args.get(api_settings.API_PAGE_NUM, default=1, type=int)
     size = request.args.get(api_settings.API_PAGE_SIZE, default=DEFAULT_SIZE, type=int)
     keywords = request.args.get(api_settings.API_KEYWORDS, default="", type=str)
+    regions = request.args.get(api_settings.API_REGIONS, default="", type=str)
 
     if query is None:
         return "Invalid input, please provide 'q' parameter", 400
+
+    if elastic.check_connection() is None:
+        return "Can't connect to Elasticsearch", 400
 
     if page_num <= 0:
         page_num = 1
 
     size = check_size_validity(size)
-    keywords_list = keywords_to_list(keywords)
+    keywords_list = string_to_list(keywords)
+    regions_list = string_to_list(regions)
 
-    body = build_query(query, keywords_list, page_num, size)
-
-    resp = es.search(index="articles_index", doc_type="_doc", body=body)
+    resp = elastic.search(query, keywords_list, regions_list, page_num, size)
     total_results = resp['hits']['total']['value']
     total_pages = int(ceil(total_results/size))
-    article_ids = get_ids(resp)
+    article_ids = elastic.get_ids(resp)
     per_page = len(article_ids)
 
     Database.initialize()
@@ -108,11 +83,10 @@ def search():
     articles = []
 
     for id in article_ids:
-        # finds article document in articles collection by id
+        # finds article document in articles collection by id and remove html field
         article = Database.find_one('articles', {'_id': ObjectId(id)})
-        article['body'] = article.pop('html')
-        articles.append(article)
-        
+        article.pop('html')
+        articles.append(article) 
         
     response = {
         "query": query,

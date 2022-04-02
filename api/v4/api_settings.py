@@ -1,6 +1,6 @@
 import os
 
-API_VERSION = "v3"
+API_VERSION = "v4"
 
 # API parameters
 # /search endpoint
@@ -11,6 +11,7 @@ API_SEARCH_LOCALE = "locale"
 API_PAGE_NUM = "page"
 API_PAGE_SIZE = "size"
 API_KEYWORDS = "keywords"
+API_REGIONS = "regions"
 
 # environmental variables
 MONGO_SERVER_URL = str(os.environ['MONGO_SERVER_URL'] or 'localhost')
@@ -35,3 +36,10 @@ ES_CONNECTION_STRING = "{protocol}://{username}:{password}@{host}:{port}/".forma
     host=ES_HOST,
     port=ES_PORT
 )
+
+ES_SEARCH_STRING = "{protocol}://{host}:{port}/{index}/_search".format(
+    protocol=ES_PROTOCOL,
+    host=ES_HOST,
+    port=ES_PORT,
+    index=ELASTIC_INDEX_NAME
+    )
