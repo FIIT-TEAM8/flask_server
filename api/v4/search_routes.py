@@ -8,6 +8,7 @@ from flask import request
 from bson.objectid import ObjectId
 from .db_connector import Database
 from .elastic import Elastic
+import logging
 
 
 # max and deafult numbers of articles returned by elasticsearch
@@ -50,6 +51,7 @@ def string_to_list(params_str):
 # main function for searching
 @search_api.route("/", methods=['GET'])
 def search():
+    
     query = request.args.get(api_settings.API_SEARCH_QUERY, default=None, type=str)
     search_from = request.args.get(api_settings.API_SEARCH_FROM, default="", type=str)
     search_to = request.args.get(api_settings.API_SEARCH_TO, default="", type=str)
@@ -73,6 +75,8 @@ def search():
     regions_list = string_to_list(regions)
 
     resp = elastic.search(query, keywords_list, regions_list, page_num, size)
+    logging.warning("ELASTIC RESPONSE")
+    logging.warning(resp)
     total_results = resp['hits']['total']['value']
     total_pages = int(ceil(total_results/size))
     article_ids = elastic.get_ids(resp)
