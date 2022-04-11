@@ -1,5 +1,3 @@
-from ast import keyword
-from email.policy import default
 from flask import Blueprint
 from flask.json import jsonify
 from math import ceil
@@ -9,13 +7,15 @@ from bson.objectid import ObjectId
 from .db_connector import Database
 from .elastic import Elastic
 
+# link: https://ew.com/recap/limitless-season-1-episode-12/  https://www.bbc.com/news/world-middle-east-35219693
+# ids=[6239b1eddf4b7decb33fbaf2, 6239b1ecdf4b7decb33fbaee, 6239b1ecdf4b7decb33fbae4]
 
 # max and deafult numbers of articles returned by elasticsearch
 MAX_SIZE = 20
 DEFAULT_SIZE = 10
 
 # /v4/search/
-search_api = Blueprint("search_routes", __name__, url_prefix="/" + api_settings.API_VERSION + "/search")
+api_v4 = Blueprint("search_routes", __name__, url_prefix="/" + api_settings.API_VERSION)
 
 elastic = Elastic()
 
@@ -48,12 +48,11 @@ def string_to_list(params_str):
 
 
 # main function for searching
-@search_api.route("/", methods=['GET'])
+@api_v4.route("/search", methods=['GET'])
 def search():
     query = request.args.get(api_settings.API_SEARCH_QUERY, default=None, type=str)
     search_from = request.args.get(api_settings.API_SEARCH_FROM, default="", type=str)
     search_to = request.args.get(api_settings.API_SEARCH_TO, default="", type=str)
-    locale = request.args.get(api_settings.API_SEARCH_LOCALE, default="", type=str)
     page_num = request.args.get(api_settings.API_PAGE_NUM, default=1, type=int)
     size = request.args.get(api_settings.API_PAGE_SIZE, default=DEFAULT_SIZE, type=int)
     keywords = request.args.get(api_settings.API_KEYWORDS, default="", type=str)
@@ -63,7 +62,7 @@ def search():
         return "Invalid input, please provide 'q' parameter", 400
 
     if elastic.check_connection() is None:
-        return "Can't connect to Elasticsearch", 400
+        return "Can't connect to Elasticsearch", 503
 
     if page_num <= 0:
         page_num = 1
@@ -92,11 +91,52 @@ def search():
         "query": query,
         "search_from": search_from,
         "search_to": search_to,
-        "locale": locale,
         "page_num": page_num,
         "per_page": per_page,
         "total_pages": total_pages,
         "total_results": total_results,
+        "results": articles
+    }
+
+    return jsonify(response)
+
+
+# get article by url from mongo db
+@api_v4.route("/archive", methods=['GET'])
+def get_article_by_link():
+    link = request.args.get(api_settings.API_LINK, default=None, type=str)
+
+    if link is None:
+        return "Invalid input, please provide 'link' parameter", 400
+    
+    Database.initialize()
+    article = Database.find_one('articles', {'link': link})
+        
+    response = {
+        "article": article
+    }
+
+    return jsonify(response)
+
+
+# get articles by ids from mongo db
+@api_v4.route("/report", methods=['GET'])
+def get_article_by_id():
+    ids = request.args.get(api_settings.API_IDS, default=None, type=str)
+
+    if ids is None:
+        return "Invalid input, please provide 'ids' parameter", 400
+
+    article_ids = string_to_list(ids)
+    Database.initialize()
+    articles = []
+
+    for id in article_ids:
+        # finds article document in articles collection by id
+        article = Database.find_one('articles', {'_id': ObjectId(id)})
+        articles.append(article) 
+        
+    response = {
         "results": articles
     }
 
