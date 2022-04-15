@@ -1,4 +1,6 @@
 import requests
+import json
+import os
 import api.v4.api_settings as api_settings
 
 
@@ -38,29 +40,16 @@ class Elastic:
     
 
     # builds elasticsearch query with or without filters
-    def build_query(self, query, keywords, regions, page_num, size):
+    def build_query(self, query, keywords, regions, search_from, search_to, page_num, size):
         
-        # default body of query withou any filters
-        self.body = {
-            # pagination
-            "from": page_num * size - size,
-            "size": size,
-            "query": {
-                "bool": {
-                    "must": [
-                        # match main query in article itself
-                        {
-                            "match": {
-                                "html": {
-                                    "query": query,
-                                    "operator": "and"
-                                }
-                            }
-                        },
-                    ]
-                }
-            }
-        }
+        # load default body of query withou any filters
+        with open('default_query.json', encoding='utf8') as file:
+            self.body = json.load(file)
+      
+        # replace placeholder values
+        self.body['from'] = self.body['from'].replace('$from', str(page_num * size - size))
+        self.body['size'] = self.body['size'].replace('$size', str(size))
+        self.body['query']['bool']['must'][0]['match']['html']['query'] = self.body['query']['bool']['must'][0]['match']['html']['query'].replace('$query', query)
 
         # add crime keywords filter
         if keywords:
@@ -80,10 +69,27 @@ class Elastic:
             }
             self.body["query"]["bool"]["must"].append(regions_filter)
         
+        # add filtering by date
+        if search_from or search_to:
+            date_filter = { 
+                "range": {
+                    "published": {
+                    }
+                }
+            }
+            if search_from:
+                year_from = search_from[:4]
+                date_filter["range"]["published"]["gte"] = year_from
+            if search_to:
+                year_to = search_to[:4]
+                date_filter["range"]["published"]["lte"] = year_to
+
+            self.body["query"]["bool"]["must"].append(date_filter)
+
 
     # build query then search
-    def search(self, query, keywords, regions, page_num, size):
-        self.build_query(query, keywords, regions, page_num, size)
+    def search(self, query, keywords, regions, search_from, search_to, page_num, size):
+        self.build_query(query, keywords, regions, search_from, search_to, page_num, size)
         headers = {}
         response = requests.get(api_settings.ES_SEARCH_STRING, 
             headers=headers, 

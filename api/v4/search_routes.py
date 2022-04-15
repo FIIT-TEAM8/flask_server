@@ -1,3 +1,4 @@
+import re
 from flask import Blueprint
 from flask.json import jsonify
 from math import ceil
@@ -7,8 +8,6 @@ from bson.objectid import ObjectId
 from .db_connector import Database
 from .elastic import Elastic
 
-# link: https://ew.com/recap/limitless-season-1-episode-12/  https://www.bbc.com/news/world-middle-east-35219693
-# ids=[6239b1eddf4b7decb33fbaf2, 6239b1ecdf4b7decb33fbaee, 6239b1ecdf4b7decb33fbae4]
 
 # max and deafult numbers of articles returned by elasticsearch
 MAX_SIZE = 20
@@ -47,6 +46,20 @@ def string_to_list(params_str):
         return None
 
 
+# get article preview containing users query
+def get_preview(article, query):
+    q_list = query.split()
+    to_search = q_list[0]
+    found = re.findall(r"([^.]*\.[^.]*?%s[^.]*\.[^.]*\.)" % to_search, article, re.IGNORECASE)
+
+    if found:
+        preview = found[len(found) - 1]
+        preview_cleaned = re.sub('<.*?>', '', preview)
+        return preview_cleaned
+    else:
+        return ''
+        
+
 # main function for searching
 @api_v4.route("/search", methods=['GET'])
 def search():
@@ -72,7 +85,7 @@ def search():
     keywords_list = string_to_list(keywords)
     regions_list = string_to_list(regions)
 
-    resp = elastic.search(query, keywords_list, regions_list, page_num, size)
+    resp = elastic.search(query, keywords_list, regions_list, search_from, search_to, page_num, size)
     total_results = resp['hits']['total']['value']
     total_pages = int(ceil(total_results/size))
     article_ids = elastic.get_ids(resp)
@@ -85,6 +98,7 @@ def search():
     for id in article_ids:
         # finds article document in articles collection by id and remove html field
         article = Database.find_one('articles', {'_id': ObjectId(id)})
+        article['preview'] = get_preview(article['html'], query)
         article.pop('html')
         articles.append(article) 
         
@@ -112,7 +126,10 @@ def get_article_by_link():
     
     Database.initialize()
     article = Database.find_one('articles', {'link': link})
-        
+    
+    if article is None:
+        return "Article does not exist", 404
+
     response = {
         "article": article
     }
@@ -132,11 +149,16 @@ def get_article_by_id():
     Database.initialize()
     articles = []
 
-    for id in article_ids:
-        # finds article document in articles collection by id
-        article = Database.find_one('articles', {'_id': ObjectId(id)})
-        articles.append(article) 
-        
+    try:
+        for id in article_ids:
+            article = Database.find_one('articles', {'_id': ObjectId(id)})
+            if article is None:
+                return "Article does not exist", 404
+            articles.append(article)
+
+    except Exception as e:
+        return str(e), 404
+
     response = {
         "results": articles
     }
