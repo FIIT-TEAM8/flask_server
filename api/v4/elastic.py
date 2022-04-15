@@ -91,3 +91,16 @@ class Elastic:
             verify=False, 
             auth=(api_settings.ES_USER, api_settings.ES_PASSWORD))
         return response.json()
+    
+
+    def get_elastic_stats(self):
+        es_url = "{protocol}://{host}:{port}/{index}/".format(
+            protocol=api_settings.ES_PROTOCOL,
+            host=api_settings.ES_HOST,
+            port=api_settings.ES_PORT,
+            index=api_settings.ELASTIC_INDEX_NAME)
+        num_of_articles = requests.get(es_url + "_count", verify=False, auth=(api_settings.ES_USER, api_settings.ES_PASSWORD)).json()["count"]
+        index_size = requests.get(es_url + "_stats/store", verify=False, auth=(api_settings.ES_USER, api_settings.ES_PASSWORD)).json()["_all"]["total"]["store"]["size_in_bytes"]
+        return {"count": num_of_articles, "size": index_size}
+
+
