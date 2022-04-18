@@ -30,16 +30,18 @@
         "Second Degree Murder",
         "Attempted Murder",
         "Arson",
-        "Terrorism"
+        "Terrorism",
+        "Hate Crime Acts"
     ],
     "Crimes against property": [
         "Larceny",
         "Robbery",
         "Shoplifting",
         "Theft",
-        "Identity Theft"
+        "Identity Theft",
+        "Bond Default"
     ],
-    "Statutory crime": [
+    "Statutory crimes": [
         "Drunk Driving",
         "Drug Distribution",
         "Drug Possession",
@@ -72,7 +74,7 @@
         "Child Pornography",
         "Sexual Conduct with a Minor"
     ],
-    "Cybercrime": [
+    "Cybercrimes": [
         "Cyber Crimes",
         "Cyberbullying",
         "Computer Crime",
@@ -84,7 +86,8 @@
         "Rape",
         "Domestic Violence",
         "Torture",
-        "Terrorism"
+        "Terrorism",
+        "Hate Crime Acts"
     ],
     "Fraud": [
         "Fraud",
@@ -107,7 +110,8 @@
         "Sale of Citizenship Papers",
         "Sale of Stolen Vehicles",
         "Smuggling",
-        "Transportation of Stolen Vehicles"
+        "Transportation of Stolen Vehicles",
+        "Illegal Emigration"
     ],
     "Vandalism": [
         "Burglary",
@@ -128,7 +132,7 @@
         "Child Abuse",
         "Child Exploitation"
     ],
-    "Crime in general": [
+    "Crimes in general": [
         "Racketeering",
         "Civil Rights Violations",
         "Copyright Matters",
