@@ -19,9 +19,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        
+          
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip uninstall bson
+          pip uninstall pymongo
+          pip install pymongo
       
       - name: Unit tests
         run: python -m unittest discover
