@@ -2,7 +2,7 @@ import unittest
 import requests
 
 class TestV2SearchRoutes(unittest.TestCase):
-    API_URL = "https://team08-21.studenti.fiit.stuba.sk/api/v2"
+    API_URL = "https://team08-21.studenti.fiit.stuba.sk/api/v4"
     SEARCH_URL = "{}/search/?q=murder".format(API_URL)
     SEARCH_URL_NO_QUERY = "{}/search/".format(API_URL)
 
