@@ -4,7 +4,7 @@ import sys
 import os
 
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-import api.v2.db_connector as database
+import api.v4.db_connector as database
 
 
 class TestMongo(unittest.TestCase):
