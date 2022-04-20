@@ -69,7 +69,7 @@ def search():
     search_to = request.args.get(api_settings.API_SEARCH_TO, default="", type=str)
     page_num = request.args.get(api_settings.API_PAGE_NUM, default=1, type=int)
     size = request.args.get(api_settings.API_PAGE_SIZE, default=DEFAULT_SIZE, type=int)
-    keywords = request.args.get(api_settings.API_KEYWORDS, default="", type=str)
+    categories = request.args.get(api_settings.API_KEYWORDS, default="", type=str)
     regions = request.args.get(api_settings.API_REGIONS, default="", type=str)
 
     if query is None:
@@ -82,10 +82,10 @@ def search():
         page_num = 1
 
     size = check_size_validity(size)
-    keywords_list = string_to_list(keywords)
+    cat_list = string_to_list(categories)
     regions_list = string_to_list(regions)
 
-    resp = elastic.search(query, keywords_list, regions_list, search_from, search_to, page_num, size)
+    resp = elastic.search(query, cat_list, regions_list, search_from, search_to, page_num, size)
     total_results = resp['hits']['total']['value']
     total_pages = int(ceil(total_results/size))
     article_ids = elastic.get_ids(resp)

@@ -4,6 +4,25 @@ import os
 import api.v4.api_settings as api_settings
 
 
+FIRST_YEAR = 2000
+LAST_YEAR = 2100
+
+
+def load_keywords(categories):
+    
+    keywords = []
+
+    # load json containg all categories and their keywords
+    with open('static/en_keyword_categories.json', encoding='utf8') as file:
+        keywords_file = json.load(file)
+
+    for cat in categories:
+        cat_keywords = keywords_file[cat]
+        keywords.extend(cat_keywords)
+
+    return keywords
+
+
 # handle elasticsearch through requests library
 class Elastic:
     def __init__(self):
@@ -40,7 +59,7 @@ class Elastic:
     
 
     # builds elasticsearch query with or without filters
-    def build_query(self, query, keywords, regions, search_from, search_to, page_num, size):
+    def build_query(self, query, categories, regions, search_from, search_to, page_num, size):
         
         # load default body of query withou any filters
         with open('default_query.json', encoding='utf8') as file:
@@ -52,7 +71,8 @@ class Elastic:
         self.body['query']['bool']['must'][0]['match']['html']['query'] = self.body['query']['bool']['must'][0]['match']['html']['query'].replace('$query', query)
 
         # add crime keywords filter
-        if keywords:
+        if categories:
+            keywords = load_keywords(categories)
             keywords_filter = {
                 "terms": {
                     "keywords.keyword": keywords
@@ -80,16 +100,21 @@ class Elastic:
             if search_from:
                 year_from = search_from[:4]
                 date_filter["range"]["published"]["gte"] = year_from
+                if not search_to:
+                    date_filter["range"]["published"]["lte"] = LAST_YEAR
+
             if search_to:
                 year_to = search_to[:4]
                 date_filter["range"]["published"]["lte"] = year_to
+                if not search_from:
+                    date_filter["range"]["published"]["gte"] = FIRST_YEAR
 
             self.body["query"]["bool"]["must"].append(date_filter)
 
 
     # build query then search
-    def search(self, query, keywords, regions, search_from, search_to, page_num, size):
-        self.build_query(query, keywords, regions, search_from, search_to, page_num, size)
+    def search(self, query, categories, regions, search_from, search_to, page_num, size):
+        self.build_query(query, categories, regions, search_from, search_to, page_num, size)
         headers = {}
         response = requests.get(api_settings.ES_SEARCH_STRING, 
             headers=headers, 
