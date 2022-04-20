@@ -1,5 +1,6 @@
 import unittest
 import requests
+import os
 
 class TestV2SearchRoutes(unittest.TestCase):
     API_URL = "https://team08-21.studenti.fiit.stuba.sk/api/v4"

@@ -2,6 +2,9 @@ import unittest
 from bson.objectid import ObjectId
 import sys
 import os
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv())
 
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 import api.v4.db_connector as database
