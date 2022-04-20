@@ -73,6 +73,6 @@ class TestMongo(unittest.TestCase):
 
 
 
-# runs all tests
-if __name__ == '__main__':
-    unittest.main()
+# # runs all tests
+# if __name__ == '__main__':
+#     unittest.main()
