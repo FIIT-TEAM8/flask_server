@@ -23,8 +23,8 @@ jobs:
       - name: Install dependencies
         run: pip install pymongo
       
-      #- name: Unit tests
-      #  run: python -m unittest discover -s test
+      - name: Unit tests
+        run: python -m unittest discover -s test
 
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: Build & push Docker image
