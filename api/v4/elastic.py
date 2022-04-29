@@ -68,7 +68,7 @@ class Elastic:
         # replace placeholder values
         self.body['from'] = self.body['from'].replace('$from', str(page_num * size - size))
         self.body['size'] = self.body['size'].replace('$size', str(size))
-        self.body['query']['bool']['must'][0]['match']['html']['query'] = self.body['query']['bool']['must'][0]['match']['html']['query'].replace('$query', query)
+        self.body['query']['bool']['must'][0]['match_phrase']['html'] = self.body['query']['bool']['must'][0]['match_phrase']['html'].replace('$query', query)
 
         # add crime keywords filter
         if categories:
