@@ -50,5 +50,5 @@ jobs:
         username: ${{ secrets.DEPLOY_USERNAME }}
         password: ${{ secrets.DEPLOY_PASSWORD }}
         script: |
-          cd /home/fiitkar/docker-folder/
+          cd /home/fiitkar/data_infrastructure
           docker-compose pull && docker-compose up --detach && docker system prune -f
