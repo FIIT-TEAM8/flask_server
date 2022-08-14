@@ -51,4 +51,4 @@ jobs:
         password: ${{ secrets.DEPLOY_PASSWORD }}
         script: |
           cd /home/fiitkar/data_infrastructure
-          docker-compose pull && docker-compose up --detach && docker system prune -f
+          docker-compose pull && docker-compose up -d --no-deps --build flask_server && docker system prune -f
