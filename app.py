@@ -8,7 +8,10 @@ from api.v4.metadata_routes import metadata_v4 as metadata_api_v4
 from api.v4.search_routes import api_v4
 from api.v2.json_encoder import MyEncoder
 from dotenv import load_dotenv
+from requests.packages import urllib3
 import os
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 app = Flask(__name__)

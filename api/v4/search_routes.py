@@ -1,3 +1,4 @@
+import logging
 import re
 from flask import Blueprint
 from flask.json import jsonify
@@ -91,17 +92,22 @@ def search():
     article_ids = elastic.get_ids(resp)
     per_page = len(article_ids)
 
-    Database.initialize()
 
     articles = []
+    # Database.initialize()
+    # for id in article_ids:
+    #     # finds article document in articles collection by id and remove html field
+    #     article = Database.find_one('articles', {'_id': ObjectId(id)})
+    #     article['preview'] = get_preview(article['html'], query)
+    #     article.pop('html')
+    #     articles.append(article) 
+    
+    for hit in resp["hits"]["hits"]:
+        article = hit["_source"]
+        article["preview"] = get_preview(article["html"], query)
+        article.pop("html")
+        articles.append(article)
 
-    for id in article_ids:
-        # finds article document in articles collection by id and remove html field
-        article = Database.find_one('articles', {'_id': ObjectId(id)})
-        article['preview'] = get_preview(article['html'], query)
-        article.pop('html')
-        articles.append(article) 
-        
     response = {
         "query": query,
         "search_from": search_from,
