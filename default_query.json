@@ -1,15 +1,19 @@
 {
-  "from": "$from",
+  "from": "$from", 
   "size": "$size",
   "query": {
-      "bool": {
-          "must": [
-              {
-                "match_phrase": {
-                  "html": "$query"
-                }
-              }
-          ]
-      }
+    "bool": {
+      "must": [
+        {
+          "multi_match": {
+            "query": "$query",
+            "type": "phrase", 
+            "fields": [
+              "title^10", "html^5"
+            ]
+          }
+        }
+      ]
+    }
   }
 }
