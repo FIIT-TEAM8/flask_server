@@ -1,6 +1,6 @@
 {
   "from": "$from", 
-  "size": "$size"
+  "size": "$size",
   "query": {
     "bool": {
       "must": [
