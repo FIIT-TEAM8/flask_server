@@ -9,6 +9,7 @@ from api.v4.search_routes import api_v4
 from api.v2.json_encoder import MyEncoder
 from dotenv import load_dotenv
 from requests.packages import urllib3
+from flask_cors import CORS
 import os
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -22,6 +23,9 @@ app.register_blueprint(metadata_api_v4, name="metada_api_v4")
 
 app.json_encoder = MyEncoder
 
+if (not os.getenv('PRODUCTION')):
+    print('RUNNING IN DEVELOPMENT ENV...')
+    cors = CORS(app, supports_credentials=True)
 
 @app.route("/api")
 def root():

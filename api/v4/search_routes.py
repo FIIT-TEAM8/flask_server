@@ -97,7 +97,7 @@ def search():
         article = hit["_source"]
         article["preview"] = get_preview(article["html"], query)
         article.pop("html")
-        article["id"] = hit["_id"]
+        article["_id"] = hit["_id"]
         articles.append(article)
 
     response = {
