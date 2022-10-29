@@ -1,6 +1,6 @@
+from flask import jsonify
 import requests
 import json
-import os
 import api.v4.api_settings as api_settings
 
 
@@ -123,15 +123,25 @@ class Elastic:
             auth=(api_settings.ES_USER, api_settings.ES_PASSWORD))
         return response.json()
     
+    def search_by_ids(self, ids):
+        query = {
+            "docs": [{"_index": api_settings.ELASTIC_INDEX_NAME, "_id": id} for id in ids]
+        }
+
+        response = requests.get(api_settings.ES_URL + "_mget",
+            headers={},
+            json=query,
+            verify=False,
+            auth=(api_settings.ES_USER, api_settings.ES_PASSWORD))
+
+        results = response.json()
+        return results['docs']
 
     def get_elastic_stats(self):
-        es_url = "{protocol}://{host}:{port}/{index}/".format(
-            protocol=api_settings.ES_PROTOCOL,
-            host=api_settings.ES_HOST,
-            port=api_settings.ES_PORT,
-            index=api_settings.ELASTIC_INDEX_NAME)
-        num_of_articles = requests.get(es_url + "_count", verify=False, auth=(api_settings.ES_USER, api_settings.ES_PASSWORD)).json()["count"]
-        index_size = requests.get(es_url + "_stats/store", verify=False, auth=(api_settings.ES_USER, api_settings.ES_PASSWORD)).json()["_all"]["total"]["store"]["size_in_bytes"]
+        num_of_articles = requests.get(api_settings.ES_URL + "_count", verify=False,
+            auth=(api_settings.ES_USER, api_settings.ES_PASSWORD)).json()["count"]
+        index_size = requests.get(api_settings.ES_URL + "_stats/store", verify=False,
+            auth=(api_settings.ES_USER, api_settings.ES_PASSWORD)).json()["_all"]["total"]["store"]["size_in_bytes"]
         return {"count": num_of_articles, "size": index_size}
 
 

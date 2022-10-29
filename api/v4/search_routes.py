@@ -4,7 +4,6 @@ from flask.json import jsonify
 from math import ceil
 import api.v4.api_settings as api_settings
 from flask import request
-from bson.objectid import ObjectId
 from .db_connector import Database
 from .elastic import Elastic
 
@@ -101,15 +100,6 @@ def search():
         article["id"] = hit["_id"]
         articles.append(article)
 
-    # articles = []
-    # Database.initialize()
-    # for id in article_ids:
-    #     # finds article document in articles collection by id and remove html field
-    #     article = Database.find_one('articles', {'_id': ObjectId(id)})
-    #     article['preview'] = get_preview(article['html'], query)
-    #     article.pop('html')
-    #     articles.append(article) 
-
     response = {
         "query": query,
         "search_from": search_from,
@@ -155,18 +145,16 @@ def get_article_by_id():
         return "Invalid input, please provide 'ids' parameter", 400
 
     article_ids = string_to_list(ids)
-    Database.initialize()
+    docs = elastic.search_by_ids(article_ids)
+
     articles = []
+    for doc in docs:
+        if doc["found"] == False:
+            return f"Article with id {doc['_id']} does not exist", 404
 
-    try:
-        for id in article_ids:
-            article = Database.find_one("articles", {"_id": ObjectId(id)})
-            if article is None:
-                return "Article does not exist", 404
-            articles.append(article)
-
-    except Exception as e:
-        return str(e), 404
+        article = doc["_source"]
+        article["_id"] = doc["_id"]
+        articles.append(article)
 
     response = {
         "results": articles

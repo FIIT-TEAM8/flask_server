@@ -42,9 +42,16 @@ ES_CONNECTION_STRING = "{protocol}://{username}:{password}@{host}:{port}/".forma
     port=ES_PORT
 )
 
+ES_URL = "{protocol}://{host}:{port}/{index}/".format(
+    protocol=ES_PROTOCOL,
+    host=ES_HOST,
+    port=ES_PORT,
+    index=ELASTIC_INDEX_NAME
+)
+
 ES_SEARCH_STRING = "{protocol}://{host}:{port}/{index}/_search".format(
     protocol=ES_PROTOCOL,
     host=ES_HOST,
     port=ES_PORT,
     index=ELASTIC_INDEX_NAME
-    )
+)
