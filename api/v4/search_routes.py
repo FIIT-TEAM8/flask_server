@@ -1,4 +1,3 @@
-import logging
 import re
 from flask import Blueprint
 from flask.json import jsonify
@@ -62,7 +61,7 @@ def get_preview(article, query):
         
 
 # main function for searching
-@api_v4.route("/search", methods=['GET'])
+@api_v4.route("/search", methods=["GET"])
 def search():
     
     query = request.args.get(api_settings.API_SEARCH_QUERY, default=None, type=str)
@@ -87,26 +86,29 @@ def search():
     regions_list = string_to_list(regions)
 
     resp = elastic.search(query, cat_list, regions_list, search_from, search_to, page_num, size)
-    total_results = resp['hits']['total']['value']
+    total_results = resp["hits"]["total"]["value"]
     total_pages = int(ceil(total_results/size))
     article_ids = elastic.get_ids(resp)
     per_page = len(article_ids)
 
-
+    hits = resp["hits"]["hits"]
     articles = []
-    Database.initialize()
-    for id in article_ids:
-        # finds article document in articles collection by id and remove html field
-        article = Database.find_one('articles', {'_id': ObjectId(id)})
-        article['preview'] = get_preview(article['html'], query)
-        article.pop('html')
-        articles.append(article) 
-    
-    # for hit in resp["hits"]["hits"]:
-    #     article = hit["_source"]
-    #     article["preview"] = get_preview(article["html"], query)
-    #     article.pop("html")
-    #     articles.append(article)
+
+    for hit in hits:
+        article = hit["_source"]
+        article["preview"] = get_preview(article["html"], query)
+        article.pop("html")
+        article["id"] = hit["_id"]
+        articles.append(article)
+
+    # articles = []
+    # Database.initialize()
+    # for id in article_ids:
+    #     # finds article document in articles collection by id and remove html field
+    #     article = Database.find_one('articles', {'_id': ObjectId(id)})
+    #     article['preview'] = get_preview(article['html'], query)
+    #     article.pop('html')
+    #     articles.append(article) 
 
     response = {
         "query": query,
@@ -123,13 +125,14 @@ def search():
 
 
 # get article by url from mongo db
-@api_v4.route("/archive", methods=['GET'])
+@api_v4.route("/archive", methods=["GET"])
 def get_article_by_link():
     link = request.args.get(api_settings.API_LINK, default=None, type=str)
 
     if link is None:
         return "Invalid input, please provide 'link' parameter", 400
     
+    # TODO: to replace mongo search, we have to reindex our index with articles in elasticsearch, to allow exact matches.
     Database.initialize()
     article = Database.find_one('articles', {'link': link})
     
@@ -144,7 +147,7 @@ def get_article_by_link():
 
 
 # get articles by ids from mongo db
-@api_v4.route("/report", methods=['GET'])
+@api_v4.route("/report", methods=["GET"])
 def get_article_by_id():
     ids = request.args.get(api_settings.API_IDS, default=None, type=str)
 
@@ -157,7 +160,7 @@ def get_article_by_id():
 
     try:
         for id in article_ids:
-            article = Database.find_one('articles', {'_id': ObjectId(id)})
+            article = Database.find_one("articles", {"_id": ObjectId(id)})
             if article is None:
                 return "Article does not exist", 404
             articles.append(article)
