@@ -4,7 +4,7 @@ from .elastic import Elastic
 from .db_connector import Database
 import json
 
-metadata_v4 = Blueprint("stats_routes", __name__, url_prefix="/" + api_settings.API_VERSION)
+metadata_v4 = Blueprint("stats_routes", __name__, url_prefix="/api/" + api_settings.API_VERSION)
 
 
 KEYWORDS_CATEGORIES = "static/en_keyword_categories.json"

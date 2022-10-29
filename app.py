@@ -16,14 +16,14 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 app = Flask(__name__)
 
-app.register_blueprint(search_api_v1, name="search_api_v1", url_prefix='/api')
-app.register_blueprint(api_v4, name="api_v4", url_prefix='/api')
-app.register_blueprint(metadata_api_v4, name="metada_api_v4", url_prefix='/api')
+app.register_blueprint(search_api_v1, name="search_api_v1")
+app.register_blueprint(api_v4, name="api_v4")
+app.register_blueprint(metadata_api_v4, name="metada_api_v4")
 
 app.json_encoder = MyEncoder
 
 
-@app.route("/")
+@app.route("/api")
 def root():
     return "<h1>/v4/search - entrypoint for searching</h1>"
 

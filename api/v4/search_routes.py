@@ -13,7 +13,7 @@ MAX_SIZE = 20
 DEFAULT_SIZE = 10
 
 # /v4/search/
-api_v4 = Blueprint("search_routes", __name__, url_prefix="/" + api_settings.API_VERSION)
+api_v4 = Blueprint("search_routes", __name__, url_prefix="/api/" + api_settings.API_VERSION)
 
 elastic = Elastic()
 

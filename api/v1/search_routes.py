@@ -4,7 +4,7 @@ from flask import request
 from random import randint
 
 # /v1/search/
-search_api = Blueprint("search_routes", __name__, url_prefix="/" + api_settings.API_VERSION + "/search")
+search_api = Blueprint("search_routes", __name__, url_prefix="/api/" + api_settings.API_VERSION + "/search")
 
 
 @search_api.route("/")
