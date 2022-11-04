@@ -98,7 +98,7 @@ def search():
         article["preview"] = "Article preview is currently not supported."
         # article["preview"] = get_preview(article["html"], query) NOTE: this regex probably consumes TOO much CPU
         article.pop("html")
-        article["id"] = hit["_id"]
+        article["_id"] = hit["_id"]
         articles.append(article)
 
     response = {
