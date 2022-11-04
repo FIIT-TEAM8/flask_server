@@ -95,7 +95,8 @@ def search():
 
     for hit in hits:
         article = hit["_source"]
-        article["preview"] = get_preview(article["html"], query)
+        article["preview"] = "Article preview is currently not supported."
+        # article["preview"] = get_preview(article["html"], query) NOTE: this regex probably consumes TOO much CPU
         article.pop("html")
         article["id"] = hit["_id"]
         articles.append(article)
