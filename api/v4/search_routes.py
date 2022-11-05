@@ -43,20 +43,6 @@ def string_to_list(params_str):
         return params_list
     else:
         return None
-
-
-# get article preview containing users query
-def get_preview(article, query):
-    q_list = query.split()
-    to_search = q_list[0]
-    found = re.findall(r"([^.]*\.[^.]*?%s[^.]*\.[^.]*\.)" % to_search, article, re.IGNORECASE)
-
-    if found:
-        preview = found[len(found) - 1]
-        preview_cleaned = re.sub('<.*?>', '', preview)
-        return preview_cleaned
-    else:
-        return ''
         
 
 # main function for searching
@@ -87,8 +73,6 @@ def search():
     resp = elastic.search(query, cat_list, regions_list, search_from, search_to, page_num, size)
     total_results = resp["hits"]["total"]["value"]
     total_pages = int(ceil(total_results/size))
-    article_ids = elastic.get_ids(resp)
-    per_page = len(article_ids)
 
     hits = resp["hits"]["hits"]
     articles = []
@@ -96,10 +80,11 @@ def search():
     for hit in hits:
         article = hit["_source"]
         article["preview"] = "Article preview is currently not supported."
-        # article["preview"] = get_preview(article["html"], query) NOTE: this regex probably consumes TOO much CPU
         article.pop("html")
         article["_id"] = hit["_id"]
         articles.append(article)
+
+    per_page = len(articles)
 
     response = {
         "query": query,

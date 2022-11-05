@@ -8,26 +8,11 @@ FIRST_YEAR = 2000
 LAST_YEAR = 2100
 
 
-def load_keywords(categories):
-    
-    keywords = []
-
-    # load json containg all categories and their keywords
-    with open('static/en_keyword_categories.json', encoding='utf8') as file:
-        keywords_file = json.load(file)
-
-    for cat in categories:
-        cat_keywords = keywords_file[cat]
-        keywords.extend(cat_keywords)
-
-    return keywords
-
-
 # handle elasticsearch through requests library
 class Elastic:
     def __init__(self):
-        pass
-
+        with open('static/en_keyword_categories.json', encoding='utf8') as file:
+            self.en_keyword_categories = json.load(file)
     
     # test request to check connection
     def check_connection(self):
@@ -47,6 +32,17 @@ class Elastic:
         except Exception as e:
             return None
 
+    
+    def load_keywords(self, categories):
+        keywords = []
+
+        for cat in categories:
+            # TODO: check if category exists and if not, inform user
+            cat_keywords = self.en_keyword_categories[cat]
+            keywords.extend(cat_keywords)
+
+        return keywords
+
 
     # get ids from elasticsearch results
     def get_ids(self, results):
@@ -60,19 +56,27 @@ class Elastic:
 
     # builds elasticsearch query with or without filters
     def build_query(self, query, categories, regions, search_from, search_to, page_num, size):
-        
-        # load default body of query withou any filters
-        with open('default_query.json', encoding='utf8') as file:
-            self.body = json.load(file)
-      
-        # replace placeholder values
-        self.body['from'] = self.body['from'].replace('$from', str(page_num * size - size))
-        self.body['size'] = self.body['size'].replace('$size', str(size))
-        self.body['query']['bool']['must'][0]['multi_match']['query'] = self.body['query']['bool']['must'][0]['multi_match']['query'].replace('$query', query)
+        self.body = {
+            "from": str(page_num * size - size), 
+            "size": str(size),
+            "query": {
+                "bool": {
+                "must": [{
+                    "multi_match": {
+                        "query": query,
+                        "type": "phrase", 
+                        "fields": [
+                            "title^10", "html^5"
+                        ]
+                    }
+                }]
+                }
+            }
+        }
 
         # add crime keywords filter
         if categories:
-            keywords = load_keywords(categories)
+            keywords = self.load_keywords(categories)
             keywords_filter = {
                 "terms": {
                     "keywords.keyword": keywords

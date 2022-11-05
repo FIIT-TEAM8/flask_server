@@ -27,9 +27,10 @@ if (not os.getenv('PRODUCTION')):
     print('RUNNING IN DEVELOPMENT ENV...')
     cors = CORS(app, supports_credentials=True)
 
-@app.route("/api")
+
+@app.route("/")
 def root():
-    return "<h1>/v4/search - entrypoint for searching</h1>"
+    return "<h1>/api/v4/search - entrypoint for searching</h1>"
 
 
 if __name__ == '__main__':
