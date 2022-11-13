@@ -53,15 +53,12 @@ class TestArchiveRoutes(unittest.TestCase):
         assert resp_data == serverResponse
 
 
-    # @mock.patch("api.v4.search_routes.Database.find_one", return_value=None)
-    # def test_archive_article_doesnt_exist(self, conn, article):
-    #     response = self.app.get('api/v4/archive?link=https://www.test.com/')
-    #     resp_json = response.data.decode('utf8').replace("'", '"')
-    #     resp_data = json.loads(resp_json)
+    @mock.patch("api.v4.search_routes.Database.find_one", return_value=None)
+    def test_archive_article_doesnt_exist(self, article):
+        response = self.app.get('api/v4/archive?link=https://www.test.com/')
+        response = response.data.decode("utf-8") 
 
-    #     print(resp_data)
-
-    #     assert resp_data == "Article does not exist"
+        assert response == "Article does not exist"
 
 if __name__ == "__main__":
     unittest.main()
