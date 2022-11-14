@@ -37,6 +37,38 @@ serverResponse = {
     ]
 }
 
+elasticAdvancedResponse = {
+    "hits": {
+        "total": {
+            "value": 1
+        },
+        "hits": [
+            {
+                "_source": {
+                    "html": "test html"
+                },
+                "_id": "864257bh4ec0b85j6er83751"
+            }
+        ]
+    }
+}
+
+serverAdvancedResponse = {
+    "query": "test",
+    "search_from": "2020-01-01",
+    "search_to": "2021-01-01",
+    "page_num": 2,
+    "per_page": 1,
+    "total_pages": 1,
+    "total_results": 1,
+    "results": [
+        {
+            '_id': '864257bh4ec0b85j6er83751',
+            'preview': 'Article preview is currently not supported.'
+        }
+    ]
+}
+
 from api.v4.search_routes import api_v4
 app.register_blueprint(api_v4, name="api_v4")
 
@@ -62,14 +94,16 @@ class TestSearchRoutes(unittest.TestCase):
         assert resp_data == serverResponse
 
 
-    # @mock.patch("api.v4.search_routes.Elastic.check_connection", return_value=200)
-    # @mock.patch("api.v4.search_routes.Elastic.search", return_value=elasticResponse)
-    # def test_advanced_search(self, conn, article):
-    #     response = self.app.get('api/v4/search?q=murder')
-    #     resp_json = response.data.decode('utf8').replace("'", '"')
-    #     resp_data = json.loads(resp_json)
+    @mock.patch("api.v4.search_routes.Elastic.check_connection", return_value=200)
+    @mock.patch("api.v4.search_routes.Elastic.search", return_value=elasticAdvancedResponse)
+    def test_advanced_search(self, conn, response):
+        response = self.app.get('api/v4/search?q=test&regions=[sk, hu, it]&keywords=[Bomb Threat, Murder]&from=2020-01-01&to=2021-01-01&page=2&size=10')
+        resp_json = response.data.decode('utf8').replace("'", '"')
+        resp_data = json.loads(resp_json)
 
-    #     assert resp_data["results"][0]["_id"] == elasticResponse["hits"]["hits"][0]["_id"]
+        print(resp_data)
+
+        assert resp_data == serverAdvancedResponse
 
 if __name__ == "__main__":
     unittest.main()
