@@ -136,7 +136,7 @@ def get_article_by_id():
     articles = []
     for doc in docs:
         if doc["found"] == False:
-            return f"Article with id {doc['_id']} does not exist", 404
+            return "Article with id {doc['_id']} does not exist", 404
 
         article = doc["_source"]
         article["_id"] = doc["_id"]
