@@ -52,7 +52,7 @@ class TestSearchRoutes(unittest.TestCase):
 
     @mock.patch("api.v4.search_routes.Elastic.check_connection", return_value=200)
     @mock.patch("api.v4.search_routes.Elastic.search", return_value=elasticResponse)
-    def test_search(self, conn, article):
+    def test_search(self, conn, response):
         response = self.app.get('api/v4/search?q=test')
         resp_json = response.data.decode('utf8').replace("'", '"')
         resp_data = json.loads(resp_json)

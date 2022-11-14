@@ -43,7 +43,7 @@ class TestArchiveRoutes(unittest.TestCase):
         assert response.data.decode("utf-8")  == "Invalid input, please provide 'link' parameter"
 
     @mock.patch("api.v4.search_routes.Database.find_one", return_value=databaseResponse)
-    def test_archive(self, article):
+    def test_archive(self, resp):
         response = self.app.get('api/v4/archive?link=https://www.test.com/')
         resp_json = response.data.decode('utf8').replace("'", '"')
         resp_data = json.loads(resp_json)
@@ -54,7 +54,7 @@ class TestArchiveRoutes(unittest.TestCase):
 
 
     @mock.patch("api.v4.search_routes.Database.find_one", return_value=None)
-    def test_archive_article_doesnt_exist(self, article):
+    def test_archive_article_doesnt_exist(self, resp):
         response = self.app.get('api/v4/archive?link=https://www.test.com/')
         response = response.data.decode("utf-8") 
 
