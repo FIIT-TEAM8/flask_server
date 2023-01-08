@@ -32,6 +32,7 @@ ES_USER = str(os.getenv('ES_USER') or 'elastic')
 ES_PASSWORD = str(os.getenv('ES_PASSWORD') or 'elastic123')
 ELASTIC_INDEX_NAME = str(os.getenv('ELASTIC_INDEX_NAME') or 'articles_index')
 ES_PROTOCOL="https"
+ES_TIMEOUT_QUERY = str(os.getenv("ES_TIMEOUT_QUERY") or '4s')
 
 
 ES_CONNECTION_STRING = "{protocol}://{username}:{password}@{host}:{port}/".format(
