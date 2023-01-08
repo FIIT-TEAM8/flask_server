@@ -57,6 +57,7 @@ class Elastic:
     # builds elasticsearch query with or without filters
     def build_query(self, query, categories, regions, search_from, search_to, page_num, size):
         self.body = {
+            "timeout": api_settings.ES_TIMEOUT_QUERY,
             "from": str(page_num * size - size), 
             "size": str(size),
             "query": {
