@@ -32,11 +32,7 @@ if (not os.getenv('PRODUCTION')):
     print('RUNNING IN DEVELOPMENT ENV...')
     cors = CORS(app, supports_credentials=True)
 
-cors = CORS(app, resources={
-    r"/*": {
-        "origins": ["https://adversea.com", "www.adversea.com", "https://www.adversea.com"]
-        }
-    })
+cors = CORS(app, resources={r"*": {"origins": "*"}})
 
 
 
