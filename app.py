@@ -11,11 +11,16 @@ from dotenv import load_dotenv
 from requests.packages import urllib3
 from flask_cors import CORS
 import os
+import logging
+
+
+
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 app = Flask(__name__)
+app.logger.setLevel(logging.DEBUG)
 
 app.register_blueprint(search_api_v1, name="search_api_v1")
 app.register_blueprint(api_v4, name="api_v4")
