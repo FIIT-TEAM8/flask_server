@@ -33,6 +33,7 @@ if (not os.getenv('PRODUCTION')):
     cors = CORS(app, supports_credentials=True)
 
 cors = CORS(app, resources={r"*": {"origins": "*"}})
+logging.getLogger('flask_cors').level = logging.DEBUG
 
 
 
